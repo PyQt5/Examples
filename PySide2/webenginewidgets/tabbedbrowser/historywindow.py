@@ -38,18 +38,14 @@
 ##
 #############################################################################
 
-from PySide2.QtWebEngineWidgets import (QWebEnginePage, QWebEngineView,
-    QWebEngineHistory, QWebEngineHistoryItem)
+from PySide2.QtWidgets import QApplication, QTreeView
 
-from PySide2.QtWidgets import QApplication, QDesktopWidget, QTreeView
-
-from PySide2.QtCore import (Signal, QAbstractTableModel, QModelIndex, Qt,
-    QRect, QUrl)
+from PySide2.QtCore import Signal, QAbstractTableModel, QModelIndex, Qt, QUrl
 
 
 class HistoryModel(QAbstractTableModel):
 
-    def __init__(self, history, parent = None):
+    def __init__(self, history, parent=None):
         super(HistoryModel, self).__init__(parent)
         self._history = history
 

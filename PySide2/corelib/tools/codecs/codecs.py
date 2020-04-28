@@ -42,7 +42,7 @@
 
 """PySide2 port of the widgets/tools/codecs example from Qt v5.x"""
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2 import QtCore, QtWidgets
 
 
 def codec_name(codec):
@@ -164,7 +164,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.aboutAct = QtWidgets.QAction("&About", self, triggered=self.about)
 
         self.aboutQtAct = QtWidgets.QAction("About &Qt", self,
-                triggered=QtWidgets.qApp.aboutQt)
+                triggered=qApp.aboutQt)
 
     def createMenus(self):
         self.saveAsMenu = QtWidgets.QMenu("&Save As", self)
