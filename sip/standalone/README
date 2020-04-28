@@ -1,0 +1,19 @@
+To create and install the extension module, run:
+
+    sip-install
+or
+    pip install .
+
+To create and install an sdist, run::
+
+    sip-sdist
+    pip install fib-0.1.tar.gz
+
+To create and install a wheel, run::
+
+    sip-wheel
+    pip install fib-0.1-*.whl
+
+To uninstall the extension module, run:
+
+    pip uninstall fib

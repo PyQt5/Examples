@@ -1,0 +1,3 @@
+This is a separate project to the 'examples-core' project (possibly with a
+different maintainer) that extends the 'extras' bindings to the 'example'
+package.
