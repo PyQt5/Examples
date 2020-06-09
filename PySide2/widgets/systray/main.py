@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -39,75 +39,20 @@
 #############################################################################
 
 import sys
-from os.path import abspath, dirname, join
 
-from PySide2.QtCore import QObject, Slot
-from PySide2.QtGui import QGuiApplication
-from PySide2.QtQml import QQmlApplicationEngine
-from PySide2.QtQuickControls2 import QQuickStyle
+from PySide2.QtWidgets import QApplication, QMessageBox, QSystemTrayIcon
 
+from window import Window
 
-class Bridge(QObject):
+if __name__ == "__main__":
+    app = QApplication()
 
-    @Slot(str, result=str)
-    def getColor(self, s):
-        if s.lower() == "red":
-            return "#ef9a9a"
-        elif s.lower() == "green":
-            return "#a5d6a7"
-        elif s.lower() == "blue":
-            return "#90caf9"
-        else:
-            return "white"
+    if not QSystemTrayIcon.isSystemTrayAvailable():
+        QMessageBox.critical(None, "Systray", "I couldn't detect any system tray on this system.")
+        sys.exit(1)
 
-    @Slot(float, result=int)
-    def getSize(self, s):
-        size = int(s * 34)
-        if size <= 0:
-            return 1
-        else:
-            return size
+    QApplication.setQuitOnLastWindowClosed(False)
 
-    @Slot(str, result=bool)
-    def getItalic(self, s):
-        if s.lower() == "italic":
-            return True
-        else:
-            return False
-
-    @Slot(str, result=bool)
-    def getBold(self, s):
-        if s.lower() == "bold":
-            return True
-        else:
-            return False
-
-    @Slot(str, result=bool)
-    def getUnderline(self, s):
-        if s.lower() == "underline":
-            return True
-        else:
-            return False
-
-
-if __name__ == '__main__':
-    app = QGuiApplication(sys.argv)
-    QQuickStyle.setStyle("Material")
-    engine = QQmlApplicationEngine()
-
-    # Instance of the Python object
-    bridge = Bridge()
-
-    # Expose the Python object to QML
-    context = engine.rootContext()
-    context.setContextProperty("con", bridge)
-
-    # Get the path of the current directory, and then add the name
-    # of the QML file, to load it.
-    qmlFile = join(dirname(__file__), 'view.qml')
-    engine.load(abspath(qmlFile))
-
-    if not engine.rootObjects():
-        sys.exit(-1)
-
+    window = Window()
+    window.show()
     sys.exit(app.exec_())

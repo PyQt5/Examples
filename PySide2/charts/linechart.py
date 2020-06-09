@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -38,76 +38,47 @@
 ##
 #############################################################################
 
+"""PySide2 port of the linechart example from Qt v5.x"""
+
 import sys
-from os.path import abspath, dirname, join
-
-from PySide2.QtCore import QObject, Slot
-from PySide2.QtGui import QGuiApplication
-from PySide2.QtQml import QQmlApplicationEngine
-from PySide2.QtQuickControls2 import QQuickStyle
+from PySide2.QtCore import QPointF
+from PySide2.QtGui import QPainter
+from PySide2.QtWidgets import QMainWindow, QApplication
+from PySide2.QtCharts import QtCharts
 
 
-class Bridge(QObject):
+class TestChart(QMainWindow):
+    def __init__(self):
+        QMainWindow.__init__(self)
 
-    @Slot(str, result=str)
-    def getColor(self, s):
-        if s.lower() == "red":
-            return "#ef9a9a"
-        elif s.lower() == "green":
-            return "#a5d6a7"
-        elif s.lower() == "blue":
-            return "#90caf9"
-        else:
-            return "white"
+        self.series = QtCharts.QLineSeries()
+        self.series.append(0, 6)
+        self.series.append(2, 4)
+        self.series.append(3, 8)
+        self.series.append(7, 4)
+        self.series.append(10, 5)
+        self.series.append(QPointF(11, 1))
+        self.series.append(QPointF(13, 3))
+        self.series.append(QPointF(17, 6))
+        self.series.append(QPointF(18, 3))
+        self.series.append(QPointF(20, 2))
 
-    @Slot(float, result=int)
-    def getSize(self, s):
-        size = int(s * 34)
-        if size <= 0:
-            return 1
-        else:
-            return size
+        self.chart = QtCharts.QChart()
+        self.chart.legend().hide()
+        self.chart.addSeries(self.series)
+        self.chart.createDefaultAxes()
+        self.chart.setTitle("Simple line chart example")
 
-    @Slot(str, result=bool)
-    def getItalic(self, s):
-        if s.lower() == "italic":
-            return True
-        else:
-            return False
+        self.chartView = QtCharts.QChartView(self.chart)
+        self.chartView.setRenderHint(QPainter.Antialiasing)
 
-    @Slot(str, result=bool)
-    def getBold(self, s):
-        if s.lower() == "bold":
-            return True
-        else:
-            return False
-
-    @Slot(str, result=bool)
-    def getUnderline(self, s):
-        if s.lower() == "underline":
-            return True
-        else:
-            return False
+        self.setCentralWidget(self.chartView)
 
 
-if __name__ == '__main__':
-    app = QGuiApplication(sys.argv)
-    QQuickStyle.setStyle("Material")
-    engine = QQmlApplicationEngine()
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
 
-    # Instance of the Python object
-    bridge = Bridge()
-
-    # Expose the Python object to QML
-    context = engine.rootContext()
-    context.setContextProperty("con", bridge)
-
-    # Get the path of the current directory, and then add the name
-    # of the QML file, to load it.
-    qmlFile = join(dirname(__file__), 'view.qml')
-    engine.load(abspath(qmlFile))
-
-    if not engine.rootObjects():
-        sys.exit(-1)
-
+    window = TestChart()
+    window.show()
+    window.resize(440, 300)
     sys.exit(app.exec_())

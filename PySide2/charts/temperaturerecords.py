@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -38,76 +38,58 @@
 ##
 #############################################################################
 
+"""PySide2 port of the Temperature Records example from Qt v5.x"""
+
 import sys
-from os.path import abspath, dirname, join
-
-from PySide2.QtCore import QObject, Slot
-from PySide2.QtGui import QGuiApplication
-from PySide2.QtQml import QQmlApplicationEngine
-from PySide2.QtQuickControls2 import QQuickStyle
+from PySide2.QtCore import Qt
+from PySide2.QtGui import QPainter
+from PySide2.QtWidgets import QMainWindow, QApplication
+from PySide2.QtCharts import QtCharts
 
 
-class Bridge(QObject):
+class MainWindow(QMainWindow):
+    def __init__(self):
+        QMainWindow.__init__(self)
+        low = QtCharts.QBarSet("Min")
+        high = QtCharts.QBarSet("Max")
+        low.append([-52, -50, -45.3, -37.0, -25.6, -8.0,
+                    -6.0, -11.8, -19.7, -32.8, -43.0, -48.0])
+        high.append([11.9, 12.8, 18.5, 26.5, 32.0, 34.8,
+                     38.2, 34.8, 29.8, 20.4, 15.1, 11.8])
 
-    @Slot(str, result=str)
-    def getColor(self, s):
-        if s.lower() == "red":
-            return "#ef9a9a"
-        elif s.lower() == "green":
-            return "#a5d6a7"
-        elif s.lower() == "blue":
-            return "#90caf9"
-        else:
-            return "white"
+        series = QtCharts.QStackedBarSeries()
+        series.append(low)
+        series.append(high)
 
-    @Slot(float, result=int)
-    def getSize(self, s):
-        size = int(s * 34)
-        if size <= 0:
-            return 1
-        else:
-            return size
+        chart = QtCharts.QChart()
+        chart.addSeries(series)
+        chart.setTitle("Temperature records in celcius")
+        chart.setAnimationOptions(QtCharts.QChart.SeriesAnimations)
 
-    @Slot(str, result=bool)
-    def getItalic(self, s):
-        if s.lower() == "italic":
-            return True
-        else:
-            return False
+        categories = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                      "Aug", "Sep", "Oct", "Nov", "Dec"]
+        axisX = QtCharts.QBarCategoryAxis()
+        axisX.append(categories)
+        axisX.setTitleText("Month")
+        chart.addAxis(axisX, Qt.AlignBottom)
+        axisY = QtCharts.QValueAxis()
+        axisY.setRange(-52, 52)
+        axisY.setTitleText("Temperature [&deg;C]")
+        chart.addAxis(axisY, Qt.AlignLeft)
+        series.attachAxis(axisX)
+        series.attachAxis(axisY)
 
-    @Slot(str, result=bool)
-    def getBold(self, s):
-        if s.lower() == "bold":
-            return True
-        else:
-            return False
+        chart.legend().setVisible(True)
+        chart.legend().setAlignment(Qt.AlignBottom)
 
-    @Slot(str, result=bool)
-    def getUnderline(self, s):
-        if s.lower() == "underline":
-            return True
-        else:
-            return False
+        chart_view = QtCharts.QChartView(chart)
+        chart_view.setRenderHint(QPainter.Antialiasing)
 
+        self.setCentralWidget(chart_view)
 
-if __name__ == '__main__':
-    app = QGuiApplication(sys.argv)
-    QQuickStyle.setStyle("Material")
-    engine = QQmlApplicationEngine()
-
-    # Instance of the Python object
-    bridge = Bridge()
-
-    # Expose the Python object to QML
-    context = engine.rootContext()
-    context.setContextProperty("con", bridge)
-
-    # Get the path of the current directory, and then add the name
-    # of the QML file, to load it.
-    qmlFile = join(dirname(__file__), 'view.qml')
-    engine.load(abspath(qmlFile))
-
-    if not engine.rootObjects():
-        sys.exit(-1)
-
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    w = MainWindow()
+    w.resize(600, 300)
+    w.show()
     sys.exit(app.exec_())

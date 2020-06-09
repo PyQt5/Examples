@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -38,76 +38,26 @@
 ##
 #############################################################################
 
+"""PySide2 port of the QML Polar Chart Example from Qt v5.x"""
+
 import sys
-from os.path import abspath, dirname, join
-
-from PySide2.QtCore import QObject, Slot
-from PySide2.QtGui import QGuiApplication
-from PySide2.QtQml import QQmlApplicationEngine
-from PySide2.QtQuickControls2 import QQuickStyle
-
-
-class Bridge(QObject):
-
-    @Slot(str, result=str)
-    def getColor(self, s):
-        if s.lower() == "red":
-            return "#ef9a9a"
-        elif s.lower() == "green":
-            return "#a5d6a7"
-        elif s.lower() == "blue":
-            return "#90caf9"
-        else:
-            return "white"
-
-    @Slot(float, result=int)
-    def getSize(self, s):
-        size = int(s * 34)
-        if size <= 0:
-            return 1
-        else:
-            return size
-
-    @Slot(str, result=bool)
-    def getItalic(self, s):
-        if s.lower() == "italic":
-            return True
-        else:
-            return False
-
-    @Slot(str, result=bool)
-    def getBold(self, s):
-        if s.lower() == "bold":
-            return True
-        else:
-            return False
-
-    @Slot(str, result=bool)
-    def getUnderline(self, s):
-        if s.lower() == "underline":
-            return True
-        else:
-            return False
+import os
+from PySide2.QtQuick import QQuickView
+from PySide2.QtCore import Qt, QUrl
+from PySide2.QtWidgets import QApplication, QMainWindow
 
 
 if __name__ == '__main__':
-    app = QGuiApplication(sys.argv)
-    QQuickStyle.setStyle("Material")
-    engine = QQmlApplicationEngine()
+    app = QApplication(sys.argv)
+    viewer = QQuickView()
 
-    # Instance of the Python object
-    bridge = Bridge()
+    viewer.engine().addImportPath(os.path.dirname(__file__))
+    viewer.engine().quit.connect(viewer.close)
 
-    # Expose the Python object to QML
-    context = engine.rootContext()
-    context.setContextProperty("con", bridge)
-
-    # Get the path of the current directory, and then add the name
-    # of the QML file, to load it.
-    qmlFile = join(dirname(__file__), 'view.qml')
-    engine.load(abspath(qmlFile))
-
-    if not engine.rootObjects():
-        sys.exit(-1)
+    viewer.setTitle = "QML Polar Chart"
+    qmlFile = os.path.join(os.path.dirname(__file__), 'main.qml')
+    viewer.setSource(QUrl.fromLocalFile(os.path.abspath(qmlFile)))
+    viewer.setResizeMode(QQuickView.SizeRootObjectToView)
+    viewer.show()
 
     sys.exit(app.exec_())

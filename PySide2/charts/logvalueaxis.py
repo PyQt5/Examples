@@ -1,6 +1,6 @@
 #############################################################################
 ##
-## Copyright (C) 2018 The Qt Company Ltd.
+## Copyright (C) 2020 The Qt Company Ltd.
 ## Contact: http://www.qt.io/licensing/
 ##
 ## This file is part of the Qt for Python examples of the Qt Toolkit.
@@ -38,76 +38,57 @@
 ##
 #############################################################################
 
+"""PySide2 port of the Logarithmic Axis Example from Qt v5.x"""
+
+
+
 import sys
-from os.path import abspath, dirname, join
-
-from PySide2.QtCore import QObject, Slot
-from PySide2.QtGui import QGuiApplication
-from PySide2.QtQml import QQmlApplicationEngine
-from PySide2.QtQuickControls2 import QQuickStyle
+from PySide2.QtCore import Qt, QPointF
+from PySide2.QtGui import QPainter
+from PySide2.QtWidgets import QMainWindow, QApplication
+from PySide2.QtCharts import QtCharts
 
 
-class Bridge(QObject):
+class TestChart(QMainWindow):
+    def __init__(self):
+        QMainWindow.__init__(self)
 
-    @Slot(str, result=str)
-    def getColor(self, s):
-        if s.lower() == "red":
-            return "#ef9a9a"
-        elif s.lower() == "green":
-            return "#a5d6a7"
-        elif s.lower() == "blue":
-            return "#90caf9"
-        else:
-            return "white"
+        self.series = QtCharts.QLineSeries()
+        self.series.append([
+            QPointF(1.0, 1.0), QPointF(2.0, 73.0), QPointF(3.0, 268.0),
+            QPointF(4.0, 17.0), QPointF(5.0, 4325.0), QPointF(6.0, 723.0)])
 
-    @Slot(float, result=int)
-    def getSize(self, s):
-        size = int(s * 34)
-        if size <= 0:
-            return 1
-        else:
-            return size
+        self.chart = QtCharts.QChart()
+        self.chart.addSeries(self.series)
+        self.chart.legend().hide()
+        self.chart.setTitle("Logarithmic axis example")
 
-    @Slot(str, result=bool)
-    def getItalic(self, s):
-        if s.lower() == "italic":
-            return True
-        else:
-            return False
+        self.axisX = QtCharts.QValueAxis()
+        self.axisX.setTitleText("Data point")
+        self.axisX.setLabelFormat("%i")
+        self.axisX.setTickCount(self.series.count())
+        self.chart.addAxis(self.axisX, Qt.AlignBottom)
+        self.series.attachAxis(self.axisX)
 
-    @Slot(str, result=bool)
-    def getBold(self, s):
-        if s.lower() == "bold":
-            return True
-        else:
-            return False
+        self.axisY = QtCharts.QLogValueAxis()
+        self.axisY.setTitleText("Values")
+        self.axisY.setLabelFormat("%g")
+        self.axisY.setBase(8.0)
+        self.axisY.setMinorTickCount(-1)
+        self.chart.addAxis(self.axisY, Qt.AlignLeft)
+        self.series.attachAxis(self.axisY)
 
-    @Slot(str, result=bool)
-    def getUnderline(self, s):
-        if s.lower() == "underline":
-            return True
-        else:
-            return False
+        self.chartView = QtCharts.QChartView(self.chart)
+        self.chartView.setRenderHint(QPainter.Antialiasing)
+
+        self.setCentralWidget(self.chartView)
 
 
-if __name__ == '__main__':
-    app = QGuiApplication(sys.argv)
-    QQuickStyle.setStyle("Material")
-    engine = QQmlApplicationEngine()
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
 
-    # Instance of the Python object
-    bridge = Bridge()
-
-    # Expose the Python object to QML
-    context = engine.rootContext()
-    context.setContextProperty("con", bridge)
-
-    # Get the path of the current directory, and then add the name
-    # of the QML file, to load it.
-    qmlFile = join(dirname(__file__), 'view.qml')
-    engine.load(abspath(qmlFile))
-
-    if not engine.rootObjects():
-        sys.exit(-1)
+    window = TestChart()
+    window.show()
+    window.resize(800, 600)
 
     sys.exit(app.exec_())
