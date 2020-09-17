@@ -59,7 +59,7 @@ import diagramscene_rc
 
 class Arrow(QGraphicsLineItem):
     def __init__(self, startItem, endItem, parent=None, scene=None):
-        super(Arrow, self).__init__(parent, scene)
+        super(Arrow, self).__init__(parent)
 
         self.arrowHead = QPolygonF()
 
@@ -153,7 +153,7 @@ class DiagramTextItem(QGraphicsTextItem):
     selectedChange = pyqtSignal(QGraphicsItem)
 
     def __init__(self, parent=None, scene=None):
-        super(DiagramTextItem, self).__init__(parent, scene)
+        super(DiagramTextItem, self).__init__(parent, scene)# 
 
         self.setFlag(QGraphicsItem.ItemIsMovable)
         self.setFlag(QGraphicsItem.ItemIsSelectable)
@@ -241,7 +241,7 @@ class DiagramItem(QGraphicsPolygonItem):
     def contextMenuEvent(self, event):
         self.scene().clearSelection()
         self.setSelected(True)
-        self.myContextMenu.exec_(event.screenPos())
+        self.contextMenu.exec_(event.screenPos())
 
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange:
@@ -309,7 +309,7 @@ class DiagramScene(QGraphicsScene):
         cursor.clearSelection()
         item.setTextCursor(cursor)
 
-        if item.toPlainText():
+        if item.toPlainText()=='':
             self.removeItem(item)
             item.deleteLater()
 
@@ -486,7 +486,7 @@ class MainWindow(QMainWindow):
         self.buttonGroup.button(item.diagramType).setChecked(False)
 
     def textInserted(self, item):
-        self.buttonGroup.button(self.InsertTextButton).setChecked(False)
+        self.buttonGroup.button(self.InsertTextButton).setChecked(False)#
         self.scene.setMode(self.pointerTypeGroup.checkedId())
 
     def currentFontChanged(self, font):
@@ -496,9 +496,9 @@ class MainWindow(QMainWindow):
         self.handleFontChange()
 
     def sceneScaleChanged(self, scale):
-        newScale = scale.left(scale.indexOf("%")).toDouble()[0] / 100.0
-        oldMatrix = self.view.matrix()
-        self.view.resetMatrix()
+        newScale = float(scale[:scale.index("%")]) / 100.0
+        oldMatrix = self.view.transform()
+        self.view.resetTransform()
         self.view.translate(oldMatrix.dx(), oldMatrix.dy())
         self.view.scale(newScale, newScale)
 
@@ -534,7 +534,7 @@ class MainWindow(QMainWindow):
 
     def handleFontChange(self):
         font = self.fontCombo.currentFont()
-        font.setPointSize(self.fontSizeCombo.currentText().toInt()[0])
+        font.setPointSize(int(self.fontSizeCombo.currentText()))
         if self.boldAction.isChecked():
             font.setWeight(QFont.Bold)
         else:
